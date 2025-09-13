@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SA-MP Chatlog Viewer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+        :root {
+            --color-primary: #34495e;
+            --color-secondary: #2c3e50;
+            --color-accent: #3498db;
+            --color-text: #2c3e50;
+            --color-placeholder: #7f8c8d;
+            --color-bg: #f6f8fb;
+            --color-card: #ffffff;
+            --color-shadow: rgba(0, 0, 0, 0.05);
+            --color-shadow-hover: rgba(0, 0, 0, 0.1);
+            --font-main: 'Poppins', sans-serif;
+            --font-code: 'Fira Code', monospace;
+            --alert-bg: rgba(241, 196, 15, 0.12);
+            --alert-border: rgba(241, 196, 15, 0.28);
+            --error-bg: rgba(231, 76, 60, 0.08);
+        }
+        * { box-sizing: border-box; margin:0; padding:0; }
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            min-height:100vh;
+            padding:20px;
+        }
+        
+        .container {
+            width:100%;
+            max-width:1200px;
+            padding:22px;
+            background-color:var(--color-card);
+            border-radius:16px;
+            box-shadow:0 10px 30px var(--color-shadow);
+            transition:box-shadow 0.3s ease;
+        }
+        .container:hover { box-shadow:0 15px 45px var(--color-shadow-hover); }
+        header { display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+        h2 { font-weight:600; font-size:1.3rem; color:var(--color-secondary); }
+        .controls { display:flex; gap:8px; align-items:center; }
+        .btn {
+            background-color:var(--color-accent);
+            color:white; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer;
+            box-shadow:0 6px 18px rgba(52,152,219,0.18);
+        }
+        .btn.secondary { background:transparent; color:var(--color-accent); border:1px solid var(--color-accent); box-shadow:none; }
+        .flex-row { display:flex; gap:12px; align-items:center; }
+        .profile{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .profile-img{
+            width:48px;
+            height:48px;
+            border-radius:50%;
+            object-fit:cover;
+            box-shadow:0 4px 12px var(--color-shadow);
+        }
+        .name{
+            font-size:1.4rem;
+            font-weight:700;
+            color:var(--color-primary);
+        }
+        .profile-link{
+            text-decoration:none;
+            color:var(--color-primary);
+        }
+        .searchingwith-i{
+            position:relative;
+            display:flex;
+            align-items:center;
+        }
+        .searchingwith-i .fa-search{
+            position:absolute;
+            left:10px;
+            color:var(--color-placeholder);
+        }
+        .searchingwith-i .fa-search:hover{
+            color:var(--color-accent);
+        }
+        .searchingwith-i .search{
+            padding-left:32px;
+        }
+
+        #logArea {
+            width:100%;
+            height:70vh;
+            background-color:#0f1720;
+            padding:16px;
+            border-radius:12px;
+            overflow-y:auto;
+            font-family:var(--font-code);
+            font-size:13px;
+            line-height:1.6;
+            color:#e6eef6;
+            border:1px solid rgba(255,255,255,0.02);
+            white-space:pre-wrap;
+            scrollbar-width: thin; /* firefox */
+            scrollbar-color: var(--color-accent) #1a242f;
+        }
+        #logArea .log-line {
+            display:block;
+            padding:6px 8px;
+            border-radius:6px;
+            transition:background 0.15s ease;
+            word-break:break-word;
+        }
+        #logArea .log-line:hover { background-color: rgba(255,255,255,0.02); }
+        #logArea .alert-line { background:var(--alert-bg); border-left:4px solid var(--alert-border); padding-left:10px; }
+        #logArea .highlight { background:rgba(46,204,113,0.08); border-left:4px solid rgba(46,204,113,0.22); }
+        #logArea .error-line { background:var(--error-bg); border-left:4px solid rgba(231,76,60,0.22); }
+
+        .muted { color:var(--color-placeholder); font-size:12px; }
+        .drop-hint { padding:10px; border-radius:8px; border:1px dashed rgba(0,0,0,0.06); text-align:center; color:var(--color-placeholder); }
+
+        /* small responsive */
+        @media (max-width:900px) {
+            .controls { flex-wrap:wrap; }
+        }
+
+        /* ================= Custom Scrollbar ================= */
+        #logArea::-webkit-scrollbar {
+            width: 10px;
+        }
+        #logArea::-webkit-scrollbar-track {
+            background: #1a242f;
+            border-radius: 10px;
+        }
+        #logArea::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+            border-radius: 10px;
+            border: 2px solid #1a242f;
+        }
+        #logArea::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+        .btnmenu{
+            background: var(--color-bg);
+            border: 1px solid rgba(0,0,0,0.06);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--color-text);
+            box-shadow: 0 6px 18px var(--color-shadow);
+        }
+        .btnmenu:hover{
+            background-color: rgba(196, 196, 196, 0.267);
+            color: rgb(59, 58, 58);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+        
+        /* ============== Dropdown Styles ============ */
+        .dropdown {
+            padding: 5px;
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            right: 0;
+            top: 100%; /* Menghilangkan margin dan menempatkannya tepat di bawah tombol */
+            padding: 4px;
+        }
+        /* Menampilkan dropdown saat hover pada container */
+        .dropdown:hover .dropdown-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .dropdown-item {
+            width: 100%;
+            padding: 10px 14px;
+            text-align: left;
+            border: none; /* Menghapus border */
+            background: transparent; /* Menggunakan background transparan */
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+        .dropdown-item:hover {
+            background-color: #e8f5ff; /* Efek hover yang lebih halus */
+        }
+
+        .volume-on-mute{
+           color: var(--color-text);
+            font-size: 16px;
+            cursor: pointer !important;
+            transition: color 0.2s ease;
+            opacity: 0.6;
+        }
+        .volume-on-mute:hover{
+            color: var(--color-placeholder);
+            opacity: 1;
+        }
+
+        .search{
+            background: var(--color-bg);
+            border: 1px solid rgba(0,0,0,0.06);
+            color: var(--color-text);
+            padding: 8px;
+            border-radius: 8px;
+            width: 220px;
+        }
+        .search::placeholder {
+            color: var(--color-placeholder);
+        }
+        .search:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 8px rgba(0,0,0,0.06);
+        }
+        @media (max-width:620px) {
+            .search{
+                display: none;
+            }
+
+            .hint{
+                display: none;
+            }
+            .dropdown{
+                padding: 0;
+                margin: 0;
+                font-size: 14px;
+                position: relative;
+                display: inline-block;
+                right: 0;
+                top: 0;
+                z-index: 1;
+
+            }
+            .searchingicon{
+                display: none;
+            }
+        }
+
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="profile">
+                <img src="https://i.postimg.cc/W4Sf1GmT/Ivantino-Francisco.jpg" class="profile-img" alt="">
+            <h2 class="name"><a href="profile.html" class="profile-link">Reza</a></h2>
+            </div>
+            <div class="controls">
+                <div class="flex-row">
+                    <div class="dropdown">
+                        <button class="btnmenu">
+                            <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <button id="pickFile" class="dropdown-item">Pilih File Chatlog</button>
+                            <button id="stopAlerts1" class="dropdown-item">Stop Alerts</button>
+                            <button id="manageRulesBtn" class="dropdown-item">Manage Rules</button>
+                        </div>
+                    </div>
+                     <i class="fa fa-volume-up btnmenu volume-on-mute" id="stopAlerts"></i>
+                </div>
+                <div class="flex-row">
+                    <div class="searchingwith-i">
+                        <input id="searchInput" class="search" type="text" placeholder="Search.."/>
+                        <i class="fa fa-search searchingicon"></i>
+                    </div>
+                    <span id="status" class="muted">Tidak ada file.</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="logArea">
+            <div class="drop-hint">Drop file .txt di sini atau klik "Pilih File Chatlog"</div>
+        </div>
+
+        <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="muted">Status: <span id="pollState">Idle</span></div>
+            <div class="muted">Auto-poll interval: 2s</div>
+        </footer>
+    </div>
+    <br>
+    <div class="container">
+        <style>
+                    :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #cccaca3b;
+            --text-color: #212529;
+            --accent-gradient: linear-gradient(45deg, #dee2e6, #ced4da);
+            --expired-color: #dc3545;
+            --active-color: #28a745;
+            --archived-color: #6c757d;
+        }
+        .form-container, .table-container {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+
+        select, input, button {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+            background: #f8f9fa;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #adb5bd;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-color);
+            background: var(--accent-gradient);
+            padding: 12px 20px;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ced4da, #adb5bd);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f1f3f5;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        /* tr:hover {
+            background: #f1f3f5;
+        } */
+
+        .status-active {
+            color: var(--active-color);
+            font-weight: 600;
+        }
+
+        .status-expired {
+            color: var(--expired-color);
+            font-weight: 600;
+        }
+
+        .status-archived {
+            color: var(--archived-color);
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .action-button {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 5px;
+        }
+        
+        .delete-button {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .delete-button:hover {
+            background: #c82333;
+        }
+        
+        .archive-button {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .archive-button:hover {
+            background: #e0a800;
+        }
+
+        .status-expired-highlight {
+            background: rgba(220, 53, 69, 0.05);
+        }
+        </style>
+        <div class="controls">
+            <h3>Tenant Tracker</h3>
+            <!-- <div class="flex-row">
+                <button class="btn" onclick="loadTenants()">Load Tenants</button>
+                <button class="btn secondary" onclick="exportTenants()">Export to JSON</button>
+            </div> -->
+        </div>
+<!-- ================= FORM ================= -->
+<div class="form-container">
+  <form id="tenantForm">
+    <select id="owner" required>
+      <option value="Jace Caldwell">Jace Caldwell</option>
+      <option value="Jace Caldwell">Jace Caldwell</option>
+      <option value="Ivantino Francisco">Ivantino Francisco</option>
+    </select>
+
+    <select id="houseId" required>
+      <option value="#WVN">West Venturas Avenue</option>
+      <option value="#102">#102</option>
+      <option value="#103">#103</option>
+    </select>
+
+    <input type="text" id="tenantName" placeholder="Tenant" required>
+    <input value="450" type="number" id="price" placeholder="Harga" required>
+
+    <!-- Pilihan durasi sewa -->
+    <select id="durationSelect">
+      <option value="7">Durasi</option>
+      <option value="7">7 Hari</option>
+      <option value="14">14 Hari</option>
+      <option value="30">30 Hari</option>
+    </select>
+
+    <div class="debuger" style="display: none;">
+            <!-- Input manual -->
+    <input type="number" id="durationManual" placeholder="Durasi Custom (hari)">
+
+    <!-- Debug: pilih tanggal manual -->
+    <input type="date" id="startDateDebug" placeholder="Tanggal Mulai (debug)">
+    </div>
+
+    <button type="submit">Tambah</button>
+  </form>
+</div>
+
+<!-- ================= TABLE ================= -->
+<div class="table-container">
+  <table id="tenantTable">
+    <thead>
+      <tr>
+        <th>Pemilik</th>
+        <th>Rumah</th>
+        <th>Tenant</th>
+        <th>Harga</th>
+        <th>Mulai</th>
+        <th>Expired</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Footer info tanggal -->
+<div id="todayInfo" style="margin-top:8px; font-size:13px; color:#555;"></div>
+
+    </div>
+    <br>
+<div class="container">
+    <style>
+        h3 {
+            font-weight: 600;
+            color: var(--color-secondary);
+            margin: 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .controls .flex-row {
+            display: flex;
+            gap: 8px; /* Jarak antar tombol */
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        pre{
+            font-family: var(--font-code);
+            background: #0f1720;
+            color: #e6eef6;
+            padding: 10px;
+            border-radius: 6px;
+            height: 200px;
+            overflow: auto;
+            border: 1px solid rgba(255,255,255,0.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+        }
+        .fa-desaign{
+            color: #ffffff;
+            margin-left: 45%;
+            font-size: 10vh;
+            vertical-align: middle;
+        }
+          @media (max-width:900px) {
+            .fa-desaign{
+                margin-left: 40%;
+                font-size: 8vh;
+                vertical-align: middle;
+
+            }
+        }
+    </style>
+    <div class="controls">
+        <h3>AFK Control</h3>
+        <div class="flex-row">
+            <button class="start" onclick="startAFK()">Start</button>
+            <button class="stop" onclick="stopAFK()">Stop</button>
+        </div>
+    </div>
+    <pre id="afkLog" style="background:#0f1720;color:#e6eef6;padding:10px;height:200px;overflow:auto">
+    <i class="fa fa-exclamation-triangle" style="color:#e74c3c"></i> <span style="color:#e74c3c">Coming Soon...</span>
+    </pre>
+     <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div class="muted">Status: <span id="">Offline</span></div>
+        </footer>
+</div>
+
+<script>
+async function startAFK(){
+  await fetch("http://localhost:5000/start");
+  loadLogs();
+}
+async function stopAFK(){
+  await fetch("http://localhost:5000/stop");
+  loadLogs();
+}
+async function loadLogs(){
+  const res = await fetch("http://localhost:5000/logs");
+  const data = await res.json();
+  document.getElementById("afkLog").textContent = data.logs.join("\n");
+}
+setInterval(loadLogs, 2000); // auto refresh log
+</script>
+
+    <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+<script>
+/* ================= Improved viewer with SweetAlert2 Rules Manager =================
+    - Keeps original Improved layout & behavior
+    - Adds modal manager (SweetAlert2) for user-friendly add/remove rules
+    - Rules persisted in localStorage under 'samp_config'
+    - No sidebar / JSON editor visible anymore (clean UI)
+    - All original logic (parseColorsSafe, polling, AFK, alerts/clears, stop) preserved
+    - [NEW] Log content is now saved to and loaded from localStorage to persist across refreshes.
+*/
+
+// Elements
+const logArea = document.getElementById('logArea');
+const pickFileBtn = document.getElementById('pickFile');
+const stopAlertsBtn = document.getElementById('stopAlerts');
+const manageRulesBtn = document.getElementById('manageRulesBtn');
+const searchInput = document.getElementById('searchInput');
+const statusEl = document.getElementById('status');
+const pollStateEl = document.getElementById('pollState');
+const alertSound = document.getElementById('alertSound');
+
+let fileHandle = null, lastText = '';
+let pollTimer = null, alertInterval = null, blinkInterval = null;
+const defaultTitle = document.title;
+let activeAlerts = [], clears = [];
+
+// Default config (same as sebelumnya)
+const DEFAULT_CONFIG = {
+    alerts: [
+        { type: "text", keyword: "/accept mission", prefix: "[TRUCKING]" },
+        { type: "regex", pattern: "\\/afk\\s+\\d+", prefix: "[AFK ALERT]" },
+        { type: "text", keyword: "fishing rod", prefix: "[FISHING]" },
+        { type: "text", keyword: "again!", prefix: "[Work]" },
+        { type: "text", keyword: "INFO: You can", prefix: "[WORK]" },
+        { type: "text", keyword: "upon completion", prefix: "[Pilot]" },
+        { type: "text", keyword: "/cc", prefix: "[settings]" }
+    ],
+    clears: [
+        { type: "text", keyword: "You are no longer in AFK-Mode!" },
+        { type: "text", keyword: "FISHING: You caught only junk" },
+        { type: "text", keyword: "blank" },
+        { type: "text", keyword: "/findtrailer" },
+        { type: "text", keyword: "/b" },
+        { type: "text", keyword: "your aircraft!" },
+        { type: "text", keyword: "weight:" },
+        { type: "text", keyword: "only junk" },
+        { type: "text", keyword: "fishing," }
+    ]
+};
+
+// ----------------- storage helpers -----------------
+function safeParseJSON(str, fallback) {
+    try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+function loadConfigFromStorage() {
+    const raw = localStorage.getItem('samp_config');
+    if (!raw) return DEFAULT_CONFIG;
+    const parsed = safeParseJSON(raw, DEFAULT_CONFIG);
+    // merge to ensure defaults exist
+    return Object.assign({}, DEFAULT_CONFIG, parsed);
+}
+function saveConfigToStorage(cfg) {
+    try { localStorage.setItem('samp_config', JSON.stringify(cfg)); return true; } catch (e) { console.error(e); return false; }
+}
+
+// Tambahkan fungsi baru untuk menyimpan dan memuat log
+function loadLogFromStorage() {
+    const savedLog = localStorage.getItem('chatlog_content');
+    if (savedLog) {
+        lastText = savedLog;
+        renderAllLines(lastText.split(/\r?\n/).filter(l => l !== ''));
+        statusEl.innerHTML = '<span class="hint">CTRL+V Open file.</span>';
+    }
+}
+function saveLogToStorage(text) {
+    localStorage.setItem('chatlog_content', text);
+}
+
+// ----------------- parse SA-MP color tags safely -----------------
+function parseColorsSafe(text) {
+    const parts = text.split(/(\{[0-9A-Fa-f]{6}\})/g);
+    let out = ''; let open = false;
+    for (const p of parts) {
+        if (/^\{[0-9A-Fa-f]{6}\}$/.test(p)) {
+            if (open) out += '</span>';
+            const hex = p.slice(1,-1);
+            out += `<span style="color:#${hex}">`;
+            open = true;
+        } else {
+            out += p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+    }
+    if (open) out += '</span>';
+    return `<span style="color:#ffffff">${out}</span>`;
+}
+
+// ----------------- render & filter -----------------
+let renderedLines = [];
+function renderAllLines(lines) {
+    renderedLines = lines.slice();
+    applyFilterAndRender();
+}
+function applyFilterAndRender() {
+    const q = (searchInput.value || '').trim();
+    let filterRe = null;
+    if (q) {
+        try { filterRe = new RegExp(q, 'i'); } catch (e) { filterRe = null; }
+    }
+    let html = '';
+    for (let i=0;i<renderedLines.length;i++) {
+        const raw = renderedLines[i];
+        if (filterRe && !filterRe.test(raw)) continue;
+        const safeHtml = parseColorsSafe(raw);
+        const isAlert = activeAlerts.some(a => {
+            if (a.type === 'text' && typeof a.keyword === 'string') return raw.includes(a.keyword);
+            if (a.type === 'regex' && a._re) return a._re.test(raw);
+            return false;
+        });
+        const isClear = clears.some(c => (c.type === 'text' && raw.includes(c.keyword)));
+        const cls = isAlert ? 'alert-line' : (isClear ? 'highlight' : '');
+        html += `<div class="log-line ${cls}" data-index="${i}">${safeHtml}</div>`;
+    }
+    logArea.innerHTML = html || '<div class="drop-hint">Tidak ada isi yang cocok.</div>';
+    logArea.scrollTop = logArea.scrollHeight;
+}
+
+// ----------------- polling -----------------
+async function readFileTextFromHandle(handle) {
+    const file = await handle.getFile();
+    return await file.text();
+}
+
+async function pollFileOnce() {
+    if (!fileHandle) {
+        // Jika tidak ada file yang dipilih, keluar dari polling
+        pollStateEl.textContent = 'Tidak ada file.';
+        return;
+    }
+    try {
+        pollStateEl.textContent = 'Polling...';
+        const text = await readFileTextFromHandle(fileHandle);
+        if (text === lastText) { pollStateEl.textContent = 'No change'; return; }
+
+        const oldLines = lastText.split(/\r?\n/).filter(l => l !== '');
+        const newLines = text.split(/\r?\n/);
+        
+        // update lastText dan simpan ke localStorage
+        lastText = text;
+        saveLogToStorage(text); // <-- Perubahan di sini
+
+        // find first diff index
+        let startIndex = 0;
+        while (startIndex < oldLines.length && startIndex < newLines.length && oldLines[startIndex] === newLines[startIndex]) startIndex++;
+        const added = newLines.slice(startIndex).filter(l => l !== '');
+
+        // update view
+        renderAllLines(newLines.filter(l => l !== ''));
+
+        if (added.length > 0) {
+            for (const line of added) {
+                // clears check first
+                let matchedClear = false;
+                for (const c of clears) {
+                    if (c.type === 'text' && line.includes(c.keyword)) { matchedClear = true; break; }
+                }
+                if (matchedClear) {
+                    stopAudioAlerts();
+                    stopBlink();
+                    continue;
+                }
+                // alerts
+                for (const a of activeAlerts) {
+                    const isMatch = (a.type === 'text' && line.includes(a.keyword)) || (a.type === 'regex' && a._re && a._re.test(line));
+                    if (isMatch) {
+                        triggerAlert(a.prefix || 'ALERT', line);
+                    }
+                }
+                // afk detection
+                const num = detectAfk(line);
+                if (num) {
+                    try {
+                        fetch(`http://localhost:5000/afk/${encodeURIComponent(num)}`)
+                            .then(r => r.text()).then(t => console.log('AFK API:', t)).catch(e => console.error('AFK API error', e));
+                    } catch (e) { console.error('AFK fetch failed', e); }
+                }
+            }
+        }
+
+    } catch (e) {
+        console.error('Polling error', e);
+        pollStateEl.textContent = 'Error';
+    } finally {
+        setTimeout(()=>{ if (pollStateEl.textContent !== 'Error') pollStateEl.textContent = 'Idle'; }, 500);
+    }
+}
+
+function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(()=> pollFileOnce(), 2000);
+    pollFileOnce();
+}
+function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; pollStateEl.textContent = 'Stopped'; }
+}
+
+// ----------------- alerts control -----------------
+function triggerAlert(prefix, line) {
+    try { alertSound.play().catch(e=>console.error('play fail', e)); } catch(e){}
+    if (!alertInterval) {
+        alertInterval = setInterval(()=>{ alertSound.play().catch(e=>console.error('play fail', e)); }, 2000);
+    }
+    startBlink(prefix);
+    showNotification(prefix, line);
+}
+function stopAudioAlerts() {
+    if (alertInterval) { clearInterval(alertInterval); alertInterval = null; }
+    try { alertSound.pause(); alertSound.currentTime = 0; } catch(e){}
+}
+function startBlink(prefix) {
+    stopBlink();
+    let visible = true;
+    const base = `🚨 ${prefix} ${defaultTitle}`;
+    blinkInterval = setInterval(()=>{ document.title = visible ? base : defaultTitle; visible = !visible; }, 1000);
+}
+function stopBlink() { if (blinkInterval) { clearInterval(blinkInterval); blinkInterval = null; } document.title = defaultTitle; }
+
+stopAlertsBtn.addEventListener('click', ()=>{ stopAudioAlerts(); stopBlink(); });
+
+// ----------------- notifications -----------------
+if (Notification && Notification.permission !== 'granted') Notification.requestPermission();
+function showNotification(title, body) {
+    if (Notification && Notification.permission === 'granted') {
+        try { new Notification(title, { body: body }); } catch (e) { console.error('notification failed', e); }
+    }
+}
+
+// ----------------- AFK -----------------
+function detectAfk(line) {
+    if (!line) return null;
+    let m = line.match(/your afk\s+(\d+)/i); if (m) return m[1];
+    m = line.match(/\/afk\s+(\d+)/i); if (m) return m[1];
+    m = line.match(/use\s+'\/afk\s+(\d+)'/i); if (m) return m[1];
+    return null;
+}
+
+// ----------------- file pick & drag/drop -----------------
+pickFileBtn.addEventListener('click', async ()=>{
+    try {
+        const [handle] = await window.showOpenFilePicker({ types:[{description:'Text Files', accept:{'text/plain':['.txt']}}] });
+        if (handle) {
+            fileHandle = handle;
+            statusEl.textContent = `File: ${handle.name}`;
+            lastText = '';
+            saveLogToStorage(''); // <-- Tambahkan ini untuk menghapus log lama
+            startPolling();
+        }
+    } catch(e){ console.error('file pick cancelled', e); }
+});
+
+logArea.addEventListener('dragover', (ev)=>{ ev.preventDefault(); ev.dataTransfer.dropEffect = 'copy'; });
+logArea.addEventListener('drop', async (ev)=>{
+    ev.preventDefault();
+    const f = ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (!f) return;
+    const text = await f.text();
+    fileHandle = { name: f.name, getFile: async () => new File([text], f.name, { type: f.type }) };
+    statusEl.textContent = `File: ${f.name} (dropped)`;
+    lastText = '';
+    saveLogToStorage(''); // <-- Tambahkan ini untuk menghapus log lama
+    startPolling();
+});
+
+// ----------------- search -----------------
+searchInput.addEventListener('input', () => applyFilterAndRender());
+
+// ----------------- Rules management with SweetAlert2 -----------------
+function prepareActiveRulesFromConfig(cfg) {
+    activeAlerts = (cfg.alerts || []).map(a => {
+        if (a.type === 'regex' && typeof a.pattern === 'string') {
+            try { a._re = new RegExp(a.pattern, 'i'); } catch(e){ a._re = null; }
+        }
+        return a;
+    });
+    clears = (cfg.clears || []).map(c => ({...c}));
+}
+
+function openManageRulesPopup() {
+    const cfg = loadConfigFromStorage();
+    // build html list for SweetAlert
+    function buildList() {
+        const alertsHtml = (cfg.alerts || []).map((a, i) => {
+            const label = a.type === 'regex' ? (a.pattern || '') : (a.keyword || '');
+            const pref = a.prefix ? ` <small style="color:#6b7280">(${a.prefix})</small>` : '';
+            return `<div style="margin-bottom:6px;"><strong>${a.type.toUpperCase()}</strong>: ${escapeHtml(label)}${pref} <button data-action="del-alert" data-i="${i}" class="sw-del" style="margin-left:8px;padding:4px 6px;border-radius:6px;border:1px solid #eee;background:#fff;cursor:pointer">Hapus</button></div>`;
+        }).join('') || '<i style="color:#6b7280">Belum ada alert</i>';
+
+        const clearsHtml = (cfg.clears || []).map((c, i) => {
+            const label = c.keyword || '';
+            return `<div style="margin-bottom:6px;"><strong>CLEAR</strong>: ${escapeHtml(label)} <button data-action="del-clear" data-i="${i}" class="sw-del" style="margin-left:8px;padding:4px 6px;border-radius:6px;border:1px solid #eee;background:#fff;cursor:pointer">Hapus</button></div>`;
+        }).join('') || '<i style="color:#6b7280">Belum ada clear</i>';
+
+        return `<div style="text-align:left;max-height:320px;overflow:auto">
+            <h4 style="margin:6px 0 4px">Alerts</h4>${alertsHtml}
+            <hr style="margin:8px 0"/>
+            <h4 style="margin:6px 0 4px">Clears</h4>${clearsHtml}
+        </div>`;
+    }
+
+    Swal.fire({
+        title: 'Manage Rules',
+        html: `
+            ${buildList()}
+            <div style="margin-top:12px;text-align:left">
+                <label style="display:block;margin-bottom:6px;font-weight:600">Tambah Rule</label>
+                <select id="sw-rule-type" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:8px">
+                    <option value="text">Text</option>
+                    <option value="regex">Regex</option>
+                </select>
+                <input id="sw-rule-key" placeholder="Keyword atau Pattern" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:8px"/>
+                <input id="sw-rule-prefix" placeholder="Prefix (optional, untuk alerts saja)" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:8px"/>
+                <select id="sw-rule-group" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd">
+                    <option value="alerts">Alert</option>
+                    <option value="clears">Clear</option>
+                </select>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Tambah',
+        cancelButtonText: 'Tutup',
+        didOpen: () => {
+            // attach delete buttons handler
+            const container = Swal.getHtmlContainer();
+            container.querySelectorAll('[data-action="del-alert"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = Number(btn.getAttribute('data-i'));
+                    cfg.alerts.splice(idx,1); saveConfigToStorage(cfg);
+                    // reopen to refresh
+                    Swal.close();
+                    setTimeout(openManageRulesPopup, 120);
+                });
+            });
+            container.querySelectorAll('[data-action="del-clear"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = Number(btn.getAttribute('data-i'));
+                    cfg.clears.splice(idx,1); saveConfigToStorage(cfg);
+                    Swal.close();
+                    setTimeout(openManageRulesPopup, 120);
+                });
+            });
+        },
+        preConfirm: () => {
+            const type = document.getElementById('sw-rule-type').value;
+            const key = document.getElementById('sw-rule-key').value.trim();
+            const prefix = document.getElementById('sw-rule-prefix').value.trim();
+            const group = document.getElementById('sw-rule-group').value;
+            if (!key) { Swal.showValidationMessage('Keyword/Pattern tidak boleh kosong'); return false; }
+            if (group === 'alerts') {
+                if (type === 'text') cfg.alerts.push({ type:'text', keyword: key, prefix: prefix });
+                else cfg.alerts.push({ type:'regex', pattern: key, prefix: prefix });
+            } else {
+                cfg.clears.push({ type:'text', keyword: key });
+            }
+            saveConfigToStorage(cfg);
+            return true;
+        }
+    }).then((res)=> {
+        if (res.isConfirmed) {
+            // apply config and refresh rules in memory
+            const newCfg = loadConfigFromStorage();
+            applyConfigFromLoaded(newCfg);
+            Swal.fire({ icon:'success', title:'Rule ditambahkan', timer:900, showConfirmButton:false });
+        } else {
+            // just refresh in-memory rules in case deletion happened
+            const newCfg = loadConfigFromStorage();
+            applyConfigFromLoaded(newCfg);
+        }
+    });
+}
+
+function escapeHtml(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
+function applyConfigFromLoaded(cfg) {
+    // prepare regex objects for regex rules
+    activeAlerts = (cfg.alerts || []).map(a => {
+        if (a.type === 'regex' && typeof a.pattern === 'string') {
+            try { a._re = new RegExp(a.pattern, 'i'); } catch (e) { a._re = null; }
+        }
+        return a;
+    });
+    clears = (cfg.clears || []).map(c => ({...c}));
+    // save again normalized
+    saveConfigToStorage(cfg);
+}
+
+// attach manager
+manageRulesBtn.addEventListener('click', openManageRulesPopup);
+
+// ----------------- init -----------------
+(function init() {
+    const cfg = loadConfigFromStorage();
+    applyConfigFromLoaded(cfg);
+    // Tambahkan ini untuk memuat log yang tersimpan saat pertama kali halaman dimuat
+    loadLogFromStorage();
+})();
+
+// Tambahkan event listener untuk Ctrl+V
+window.addEventListener('keydown', (event) => {
+  if (event.ctrlKey && event.key === 'v') {
+    event.preventDefault();
+    pickFileBtn.click();
+  }
+});
+
+function saveDailyLog(text) {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  localStorage.setItem("chatlog_" + today, text);
+}
+
+// panggil setiap kali saveLogToStorage dipanggil
+function saveLogToStorage(text) {
+  localStorage.setItem('chatlog_content', text);
+  saveDailyLog(text); // tambahan
+}
+// <!-- ================= SCRIPT TENANT FORM ================= -->
+const tenantForm = document.getElementById("tenantForm");
+  const tenantTableBody = document.querySelector("#tenantTable tbody");
+  let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
+
+  // render tabel tenant
+  function renderTable() {
+    tenantTableBody.innerHTML = "";
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    tenants.forEach(t => {
+      const startDate = new Date(t.startDate);
+      const expiredDate = new Date(startDate);
+      expiredDate.setDate(startDate.getDate() + parseInt(t.duration));
+
+      t.isExpired = expiredDate < today;
+      t.expiredDate = expiredDate.toISOString().split("T")[0];
+
+      const timeDiff = expiredDate.getTime() - today.getTime();
+      t.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      if (t.daysLeft < 0) t.daysLeft = 0;
+    });
+
+    tenants.forEach((t, index) => {
+      const row = document.createElement("tr");
+
+      let statusText;
+      if (t.isArchived) {
+        statusText = `<span style="color:gray">Archived</span>`;
+      } else if (t.isExpired) {
+        statusText = `<span style="color:red;font-weight:bold">Expired</span>`;
+      } else {
+        statusText = `<span style="color:green;font-weight:bold">Aktif (${t.daysLeft} Hari)</span>`;
+      }
+
+      row.innerHTML = `
+        <td>${t.owner}</td>
+        <td>${t.houseId}</td>
+        <td>${t.tenantName}</td>
+       <td>${t.price ? t.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '$0.00'}</td>
+        <td>${t.startDate}</td>
+        <td>${t.expiredDate}</td>
+        <td>${statusText}</td>
+        <td><button onclick="deleteTenant(${index})">Hapus</button></td>
+      `;
+      tenantTableBody.appendChild(row);
+    });
+  }
+
+  // simpan ke localStorage
+  function saveData() {
+    localStorage.setItem("tenants", JSON.stringify(tenants));
+  }
+
+  // event submit tenant form
+  tenantForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    // ambil tanggal manual debug kalau ada, kalau kosong pakai hari ini
+    let startDate = document.getElementById("startDateDebug").value;
+    if (!startDate) {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      startDate = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // ambil durasi
+    let duration = document.getElementById("durationManual").value;
+    if (!duration) {
+      duration = document.getElementById("durationSelect").value;
+    }
+    duration = parseInt(duration) || 7; // default 7
+
+    const newTenant = {
+      owner: document.getElementById("owner").value,
+      houseId: document.getElementById("houseId").value,
+      tenantName: document.getElementById("tenantName").value,
+      price: parseFloat(document.getElementById("price").value) || 0,
+      startDate: startDate,   // pakai debug kalau ada
+      duration: duration,
+      isArchived: false,
+    };
+
+    // tambahkan ke atas
+    tenants.unshift(newTenant);
+
+    saveData();
+    renderTable();
+    tenantForm.reset();
+  });
+
+  // hapus tenant
+  function deleteTenant(index) {
+    tenants.splice(index, 1);
+    saveData();
+    renderTable();
+  }
+
+  // tampilkan tanggal hari ini di footer
+  function showToday() {
+    const today = new Date();
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    const infoEl = document.getElementById("todayInfo");
+    if (infoEl) {
+      infoEl.textContent = "This day is: " + today.toLocaleDateString('id-ID', options);
+    }
+  }
+  
+  // init render
+  renderTable();
+  showToday();
+</script>
+</body>
+</html>
