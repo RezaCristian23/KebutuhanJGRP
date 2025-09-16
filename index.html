@@ -1392,7 +1392,7 @@ function saveLogToStorage(text) {
 
             // Tampilkan jadwal untuk hari ini secara default
             const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
-            const todayBtn = document.querySelector(`.filter-btn[data-day="${today}"]`);
+            const todayBtn = document.querySelector(`.filter-btn[data-day=\"${today}\"]`);
             if (todayBtn) {
                 todayBtn.click();
             } else {
@@ -1443,6 +1443,11 @@ function saveLogToStorage(text) {
         Sortable.create(mainContent, {
             animation: 150,
             ghostClass: 'sortable-ghost',
+            delay: 300, // Mengurangi delay menjadi 300ms
+            delayOnTouchOnly: true,
+            touchStartThreshold: 3,
+            filter: 'button, a, input, [data-no-dnd]', // Menambahkan filter untuk mengabaikan tombol
+            preventOnFilter: true, // Memastikan event drag tidak terjadi pada elemen yang difilter
             onEnd: function (evt) {
                 // Panggil fungsi saveOrder saat drag and drop selesai
                 saveOrder();
