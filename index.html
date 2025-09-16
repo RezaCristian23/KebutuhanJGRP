@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
 <style>
         :root {
@@ -39,7 +40,7 @@
             min-height:100vh;
             padding:20px;
         }
-        
+
         .container {
             width:100%;
             max-width:1200px;
@@ -48,6 +49,7 @@
             border-radius:16px;
             box-shadow:0 10px 30px var(--color-shadow);
             transition:box-shadow 0.3s ease;
+            cursor: grab; /* Menambahkan cursor grab untuk indikasi */
         }
         .container:hover { box-shadow:0 15px 45px var(--color-shadow-hover); }
         header { display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:14px; }
@@ -132,6 +134,7 @@
         /* small responsive */
         @media (max-width:900px) {
             .controls { flex-wrap:wrap; }
+            .muted{display: none;}
         }
 
         /* ================= Custom Scrollbar ================= */
@@ -166,7 +169,7 @@
             color: rgb(59, 58, 58);
             box-shadow: 0 6px 18px rgba(0,0,0,0.06);
         }
-        
+
         /* ============== Dropdown Styles ============ */
         .dropdown {
             padding: 5px;
@@ -257,319 +260,551 @@
                 display: none;
             }
         }
+        /* Style untuk penempatan container */
+        #main-content {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Jarak antar container */
+        }
 
+        /* Style untuk placeholder drag and drop */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f0f0f0;
+            border: 1px dashed #bbb;
+        }
 </style>
 
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="profile">
-                <img src="https://i.postimg.cc/W4Sf1GmT/Ivantino-Francisco.jpg" class="profile-img" alt="">
-            <h2 class="name"><a href="profile.html" class="profile-link">Reza</a></h2>
-            </div>
-            <div class="controls">
-                <div class="flex-row">
-                    <div class="dropdown">
-                        <button class="btnmenu">
-                            <i class="fa fa-ellipsis-v"></i>
-                        </button>
-                        <div class="dropdown-content">
-                            <button id="pickFile" class="dropdown-item">Pilih File Chatlog</button>
-                            <button id="stopAlerts1" class="dropdown-item">Stop Alerts</button>
-                            <button id="manageRulesBtn" class="dropdown-item">Manage Rules</button>
+    <div id="main-content">
+        <div class="container" id="chatlog-container">
+            <header>
+                <div class="profile">
+                    <img src="https://i.postimg.cc/W4Sf1GmT/Ivantino-Francisco.jpg" class="profile-img" alt="">
+                <h2 class="name"><a href="profile.html" class="profile-link">Reza</a></h2>
+                </div>
+                <div class="controls">
+                    <div class="flex-row">
+                        <div class="dropdown">
+                            <button class="btnmenu">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <button id="pickFile" class="dropdown-item">Pilih File Chatlog</button>
+                                <button id="stopAlerts1" class="dropdown-item">Stop Alerts</button>
+                                <button id="manageRulesBtn" class="dropdown-item">Manage Rules</button>
+                            </div>
                         </div>
+                        <i class="fa fa-volume-up btnmenu volume-on-mute" id="stopAlerts"></i>
                     </div>
-                     <i class="fa fa-volume-up btnmenu volume-on-mute" id="stopAlerts"></i>
+                    <div class="flex-row">
+                        <div class="searchingwith-i">
+                            <input id="searchInput" class="search" type="text" placeholder="Search.."/>
+                            <i class="fa fa-search searchingicon"></i>
+                        </div>
+                        <span id="status" class="muted">Tidak ada file.</span>
+                    </div>
                 </div>
-                <div class="flex-row">
-                    <div class="searchingwith-i">
-                        <input id="searchInput" class="search" type="text" placeholder="Search.."/>
-                        <i class="fa fa-search searchingicon"></i>
+            </header>
+
+            <div id="logArea">
+                <div class="drop-hint">Drop file .txt di sini atau klik "Pilih File Chatlog"</div>
+            </div>
+
+            <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="muted">Status: <span id="pollState">Idle</span></div>
+                <div class="muted">Auto-poll interval: 2s</div>
+            </footer>
+        </div>
+        <div class="container" id="tenant-container">
+            <style>
+                        :root {
+                --bg-color: #f8f9fa;
+                --card-bg: #cccaca3b;
+                --text-color: #212529;
+                --accent-gradient: linear-gradient(45deg, #dee2e6, #ced4da);
+                --expired-color: #dc3545;
+                --active-color: #28a745;
+                --archived-color: #6c757d;
+            }
+            .form-container, .table-container {
+                background: var(--card-bg);
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                margin-bottom: 25px;
+            }
+
+            form {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                align-items: center;
+            }
+
+            select, input, button {
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+                font-size: 14px;
+                background: #f8f9fa;
+                color: var(--text-color);
+                transition: all 0.3s ease;
+            }
+
+            input:focus, select:focus {
+                outline: none;
+                border-color: #adb5bd;
+            }
+
+            button {
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                color: var(--text-color);
+                background: var(--accent-gradient);
+                padding: 12px 20px;
+            }
+
+            button:hover {
+                background: linear-gradient(45deg, #ced4da, #adb5bd);
+                transform: translateY(-2px);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #e9ecef;
+                font-size: 14px;
+            }
+
+            th {
+                background: #f1f3f5;
+                color: var(--text-color);
+                font-weight: 600;
+            }
+
+            /* tr:hover {
+                background: #f1f3f5;
+            } */
+
+            .status-active {
+                color: var(--active-color);
+                font-weight: 600;
+            }
+
+            .status-expired {
+                color: var(--expired-color);
+                font-weight: 600;
+            }
+
+            .status-archived {
+                color: var(--archived-color);
+                font-style: italic;
+                font-weight: normal;
+            }
+
+            .action-button {
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: none;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.3s;
+                margin-right: 5px;
+            }
+
+            .delete-button {
+                background: #dc3545;
+                color: white;
+            }
+
+            .delete-button:hover {
+                background: #c82333;
+            }
+
+            .archive-button {
+                background: #ffc107;
+                color: #212529;
+            }
+
+            .archive-button:hover {
+                background: #e0a800;
+            }
+
+            .status-expired-highlight {
+                background: rgba(220, 53, 69, 0.05);
+            }
+            </style>
+            <div class="controls">
+                <h3>Tenant Tracker</h3>
+                </div>
+    <div class="form-container">
+    <form id="tenantForm">
+        <select id="owner" required>
+        <option value="Jace Caldwell">Jace Caldwell</option>
+        <option value="Jace Caldwell">Jace Caldwell</option>
+        <option value="Ivantino Francisco">Ivantino Francisco</option>
+        </select>
+
+        <select id="houseId" required>
+        <option value="#WVN">West Venturas Avenue</option>
+        <option value="#102">#102</option>
+        <option value="#103">#103</option>
+        </select>
+
+        <input type="text" id="tenantName" placeholder="Tenant" required>
+        <input value="450" type="number" id="price" placeholder="Harga" required>
+
+        <select id="durationSelect">
+        <option value="7">Durasi</option>
+        <option value="7">7 Hari</option>
+        <option value="14">14 Hari</option>
+        <option value="30">30 Hari</option>
+        </select>
+
+        <div class="debuger" style="display: none;">
+                <input type="number" id="durationManual" placeholder="Durasi Custom (hari)">
+
+        <input type="date" id="startDateDebug" placeholder="Tanggal Mulai (debug)">
+        </div>
+
+        <button type="submit">Tambah</button>
+    </form>
+    </div>
+
+    <div class="table-container">
+    <table id="tenantTable">
+        <thead>
+        <tr>
+            <th>Pemilik</th>
+            <th>Rumah</th>
+            <th>Tenant</th>
+            <th>Harga</th>
+            <th>Mulai</th>
+            <th>Expired</th>
+            <th>Status</th>
+            <th>Aksi</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    </div>
+
+    <div id="todayInfo" style="margin-top:8px; font-size:13px; color:#555;"></div>
+
+        </div>
+        <div class="container" id="schedule-container">
+            <style>
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #34495e;
+                --accent-color: #3498db;
+                --accent-dark: #2980b9;
+                --background-light: #ecf0f1;
+                --background-dark: #f9fafb;
+                --text-color: #2d3436;
+                --text-muted: #7f8c8d;
+            }
+
+            body {
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: var(--background-light);
+                color: var(--text-color);
+                transition: background-color 0.3s ease;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            h1 {
+                text-align: center;
+                margin-bottom: 25px;
+                font-size: 1.8em; /* Ukuran lebih kecil */
+                font-weight: 600; /* Font lebih tipis */
+                color: var(--primary-color);
+            }
+
+            .filter-section {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap; /* Tombol bisa turun baris di layar kecil */
+                gap: 10px;
+                margin-bottom: 30px;
+            }
+
+            .filter-btn {
+                background-color: white;
+                color: var(--secondary-color);
+                border: 1px solid #bdc3c7;
+                padding: 10px 18px;
+                border-radius: 25px; /* Bentuk pil */
+                font-size: 0.9em;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .filter-btn:hover {
+                background-color: #f0f0f0;
+                border-color: var(--accent-color);
+            }
+
+            .filter-btn.active {
+                background-color: var(--accent-color);
+                color: white;
+                border-color: var(--accent-color);
+                box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+            }
+
+            .day {
+                margin-bottom: 30px;
+                display: none; /* Default hidden, JS will show */
+            }
+
+            .day.active {
+                display: block;
+            }
+
+            .day-header {
+                margin-bottom: 15px;
+            }
+
+            .day-header h2 {
+                margin: 0;
+                font-size: 1.5em;
+                font-weight: 600;
+                color: var(--primary-color);
+                border-left: 4px solid var(--accent-color);
+                padding-left: 10px;
+            }
+
+            .schedule-grid {
+                display: grid;
+                gap: 15px;
+            }
+
+            .card {
+                background: var(--card-bg);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+
+            .info {
+                flex-grow: 1;
+            }
+
+            .time {
+                font-weight: 600;
+                color: var(--accent-color);
+                font-size: 1em;
+            }
+
+            .subject {
+                font-size: 1.1em;
+                font-weight: 600;
+                margin: 5px 0;
+                color: var(--secondary-color);
+            }
+
+            .meta {
+                font-size: 0.8em;
+                color: var(--text-muted);
+            }
+
+            .room {
+                background: #eaf2f8;
+                color: #2980b9;
+                padding: 6px 12px;
+                border-radius: 8px;
+                font-size: 0.9em;
+                font-weight: 600;
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .container {
+                    padding: 10px;
+                }
+
+                h1 {
+                    font-size: 1.6em;
+                }
+
+                .filter-section {
+                    justify-content: flex-start;
+                }
+                .filter-btn {
+                    flex-grow: 1;
+                    text-align: center;
+                }
+
+                .card-content {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .room {
+                    margin-top: 10px;
+                }
+            }
+        </style>
+        <h1>Schedule</h1>
+            <div class="filter-section">
+                <button class="filter-btn active" data-day="all">Semua</button>
+                <button class="filter-btn" data-day="Senin">Senin</button>
+                <button class="filter-btn" data-day="Selasa">Selasa</button>
+                <button class="filter-btn" data-day="Rabu">Rabu</button>
+                <button class="filter-btn" data-day="Kamis">Kamis</button>
+                <button class="filter-btn" data-day="Jumat">Jumat</button>
+            </div>
+
+            <div id="schedule">
+                <div class="day" data-day="Senin">
+                    <div class="day-header"><h2>Senin</h2></div>
+                    <div class="schedule-grid">
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">13:30 - 15:10</div><div class="subject">Statistika & Probabilitas (2 SKS)</div><div class="meta">Dosen: Posma S. Lumbanraja (PL)</div></div><div class="room">203A</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">15:30 - 17:10</div><div class="subject">Prak. Statistika & Probabilitas (1 SKS)</div><div class="meta">Dosen: Posma S. Lumbanraja (PL)</div></div><div class="room">Lab1</div></div></div>
                     </div>
-                    <span id="status" class="muted">Tidak ada file.</span>
+                </div>
+
+                <div class="day" data-day="Selasa">
+                    <div class="day-header"><h2>Selasa</h2></div>
+                    <div class="schedule-grid">
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">08:30 - 11:00</div><div class="subject">Analisa & Desain Perangkat Lunak (3 SKS)</div><div class="meta">Dosen: Margaretha Yohanna (MY)</div></div><div class="room">322A</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">11:00 - 13:30</div><div class="subject">Grafika Komputer (3 SKS)</div><div class="meta">Dosen: Imelda Sinaga (IS) <div class="meta" style="font-weight: bold;">Kelas Atas</div></div></div><div class="room">313A</div></div></div>
+                    </div>
+                </div>
+
+                <div class="day" data-day="Rabu">
+                    <div class="day-header"><h2>Rabu</h2></div>
+                    <div class="schedule-grid">
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">08:00 - 10:10</div><div class="subject">Sistem Operasi (2 SKS)</div><div class="meta">Dosen: Unknow (PH)</div></div><div class="room">316A</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">11:00 - 12:40</div><div class="subject">Prak. Sistem Operasi (1 SKS)</div><div class="meta">Dosen: Asaziduhu Gea (AG)</div></div><div class="room">Lab4</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">13:30 - 15:10</div><div class="subject">Analisa Algoritma (3 SKS)</div><div class="meta">Dosen: Erwin Panggabean (EP)</div></div><div class="room">202A</div></div></div>
+                    </div>
+                </div>
+
+                <div class="day" data-day="Kamis">
+                    <div class="day-header"><h2>Kamis</h2></div>
+                    <div class="schedule-grid">
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">11:00 - 12:40</div><div class="subject">Prak. Desain Web (1 SKS)</div><div class="meta">Dosen: Samuel Manurung (SM)</div></div><div class="room">Lab2</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">13:30 - 15:10</div><div class="subject">Desain Web (3 SKS)</div><div class="meta">Dosen: Samuel Manurung (SM)</div></div><div class="room">205A</div></div></div>
+                    </div>
+                </div>
+
+                <div class="day" data-day="Jumat">
+                    <div class="day-header"><h2>Jumat</h2></div>
+                    <div class="schedule-grid">
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">13:30 - 15:10</div><div class="subject">P Berorientasi Objek (3 SKS)</div><div class="meta">Dosen: Edward Rajagukguk (ER)</div></div><div class="room">307A</div></div></div>
+                        <div class="card"><div class="card-content"><div class="info"><div class="time">15:10 - 17:00</div><div class="subject">Prak. P Berorientasi Objek (1 SKS)</div><div class="meta">Dosen: Edward Rajagukguk (ER)</div></div><div class="room">Lab4</div></div></div>
+                    </div>
                 </div>
             </div>
-        </header>
-
-        <div id="logArea">
-            <div class="drop-hint">Drop file .txt di sini atau klik "Pilih File Chatlog"</div>
         </div>
+        <div class="container" id="afk-container">
+            <style>
+                h3 {
+                    font-weight: 600;
+                    color: var(--color-secondary);
+                    margin: 0;
+                }
 
-        <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
-            <div class="muted">Status: <span id="pollState">Idle</span></div>
-            <div class="muted">Auto-poll interval: 2s</div>
-        </footer>
-    </div>
-    <br>
-    <div class="container">
-        <style>
-                    :root {
-            --bg-color: #f8f9fa;
-            --card-bg: #cccaca3b;
-            --text-color: #212529;
-            --accent-gradient: linear-gradient(45deg, #dee2e6, #ced4da);
-            --expired-color: #dc3545;
-            --active-color: #28a745;
-            --archived-color: #6c757d;
-        }
-        .form-container, .table-container {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 25px;
-        }
+                .controls {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+                }
 
-        form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            align-items: center;
-        }
+                .controls .flex-row {
+                    display: flex;
+                    gap: 8px; /* Jarak antar tombol */
+                }
 
-        select, input, button {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            font-size: 14px;
-            background: #f8f9fa;
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
+                .controls button {
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    border: none;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s ease, transform 0.1s ease;
+                }
+                pre{
+                    font-family: var(--font-code);
+                    background: #0f1720;
+                    color: #e6eef6;
+                    padding: 10px;
+                    border-radius: 6px;
+                    height: 200px;
+                    overflow: auto;
+                    border: 1px solid rgba(255,255,255,0.02);
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                    white-space: pre-wrap;
+                }
+                .fa-desaign{
+                    color: #ffffff;
+                    margin-left: 45%;
+                    font-size: 10vh;
+                    vertical-align: middle;
+                }
+                @media (max-width:900px) {
+                    .fa-desaign{
+                        margin-left: 40%;
+                        font-size: 8vh;
+                        vertical-align: middle;
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #adb5bd;
-        }
-
-        button {
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-color);
-            background: var(--accent-gradient);
-            padding: 12px 20px;
-        }
-
-        button:hover {
-            background: linear-gradient(45deg, #ced4da, #adb5bd);
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-            font-size: 14px;
-        }
-
-        th {
-            background: #f1f3f5;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        /* tr:hover {
-            background: #f1f3f5;
-        } */
-
-        .status-active {
-            color: var(--active-color);
-            font-weight: 600;
-        }
-
-        .status-expired {
-            color: var(--expired-color);
-            font-weight: 600;
-        }
-
-        .status-archived {
-            color: var(--archived-color);
-            font-style: italic;
-            font-weight: normal;
-        }
-
-        .action-button {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: none;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-right: 5px;
-        }
-        
-        .delete-button {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .delete-button:hover {
-            background: #c82333;
-        }
-        
-        .archive-button {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .archive-button:hover {
-            background: #e0a800;
-        }
-
-        .status-expired-highlight {
-            background: rgba(220, 53, 69, 0.05);
-        }
-        </style>
-        <div class="controls">
-            <h3>Tenant Tracker</h3>
-            <!-- <div class="flex-row">
-                <button class="btn" onclick="loadTenants()">Load Tenants</button>
-                <button class="btn secondary" onclick="exportTenants()">Export to JSON</button>
-            </div> -->
-        </div>
-<!-- ================= FORM ================= -->
-<div class="form-container">
-  <form id="tenantForm">
-    <select id="owner" required>
-      <option value="Jace Caldwell">Jace Caldwell</option>
-      <option value="Jace Caldwell">Jace Caldwell</option>
-      <option value="Ivantino Francisco">Ivantino Francisco</option>
-    </select>
-
-    <select id="houseId" required>
-      <option value="#WVN">West Venturas Avenue</option>
-      <option value="#102">#102</option>
-      <option value="#103">#103</option>
-    </select>
-
-    <input type="text" id="tenantName" placeholder="Tenant" required>
-    <input value="450" type="number" id="price" placeholder="Harga" required>
-
-    <!-- Pilihan durasi sewa -->
-    <select id="durationSelect">
-      <option value="7">Durasi</option>
-      <option value="7">7 Hari</option>
-      <option value="14">14 Hari</option>
-      <option value="30">30 Hari</option>
-    </select>
-
-    <div class="debuger" style="display: none;">
-            <!-- Input manual -->
-    <input type="number" id="durationManual" placeholder="Durasi Custom (hari)">
-
-    <!-- Debug: pilih tanggal manual -->
-    <input type="date" id="startDateDebug" placeholder="Tanggal Mulai (debug)">
-    </div>
-
-    <button type="submit">Tambah</button>
-  </form>
-</div>
-
-<!-- ================= TABLE ================= -->
-<div class="table-container">
-  <table id="tenantTable">
-    <thead>
-      <tr>
-        <th>Pemilik</th>
-        <th>Rumah</th>
-        <th>Tenant</th>
-        <th>Harga</th>
-        <th>Mulai</th>
-        <th>Expired</th>
-        <th>Status</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<!-- Footer info tanggal -->
-<div id="todayInfo" style="margin-top:8px; font-size:13px; color:#555;"></div>
-
-    </div>
-    <br>
-<div class="container">
-    <style>
-        h3 {
-            font-weight: 600;
-            color: var(--color-secondary);
-            margin: 0;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .controls .flex-row {
-            display: flex;
-            gap: 8px; /* Jarak antar tombol */
-        }
-
-        .controls button {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-        pre{
-            font-family: var(--font-code);
-            background: #0f1720;
-            color: #e6eef6;
-            padding: 10px;
-            border-radius: 6px;
-            height: 200px;
-            overflow: auto;
-            border: 1px solid rgba(255,255,255,0.02);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            white-space: pre-wrap;
-        }
-        .fa-desaign{
-            color: #ffffff;
-            margin-left: 45%;
-            font-size: 10vh;
-            vertical-align: middle;
-        }
-          @media (max-width:900px) {
-            .fa-desaign{
-                margin-left: 40%;
-                font-size: 8vh;
-                vertical-align: middle;
-
-            }
-        }
-    </style>
-    <div class="controls">
-        <h3>AFK Control</h3>
-        <div class="flex-row">
-            <button class="start" onclick="startAFK()">Start</button>
-            <button class="stop" onclick="stopAFK()">Stop</button>
+                    }
+                }
+            </style>
+            <div class="controls">
+                <h3>AFK Control</h3>
+                <div class="flex-row">
+                    <button class="start" onclick="startAFK()">Start</button>
+                    <button class="stop" onclick="stopAFK()">Stop</button>
+                </div>
+            </div>
+            <pre id="afkLog" style="background:#0f1720;color:#e6eef6;padding:10px;height:200px;overflow:auto">
+            <i class="fa fa-exclamation-triangle" style="color:#e74c3c"></i> <span style="color:#e74c3c">Coming Soon...</span>
+            </pre>
+            <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="muted">Status: <span id="">Offline</span></div>
+            </footer>
         </div>
     </div>
-    <pre id="afkLog" style="background:#0f1720;color:#e6eef6;padding:10px;height:200px;overflow:auto">
-    <i class="fa fa-exclamation-triangle" style="color:#e74c3c"></i> <span style="color:#e74c3c">Coming Soon...</span>
-    </pre>
-     <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
-            <div class="muted">Status: <span id="">Offline</span></div>
-        </footer>
-</div>
 
 <script>
 async function startAFK(){
@@ -734,7 +969,7 @@ async function pollFileOnce() {
 
         const oldLines = lastText.split(/\r?\n/).filter(l => l !== '');
         const newLines = text.split(/\r?\n/);
-        
+
         // update lastText dan simpan ke localStorage
         lastText = text;
         saveLogToStorage(text); // <-- Perubahan di sini
@@ -1015,8 +1250,7 @@ function saveLogToStorage(text) {
   localStorage.setItem('chatlog_content', text);
   saveDailyLog(text); // tambahan
 }
-// <!-- ================= SCRIPT TENANT FORM ================= -->
-const tenantForm = document.getElementById("tenantForm");
+// const tenantForm = document.getElementById("tenantForm");
   const tenantTableBody = document.querySelector("#tenantTable tbody");
   let tenants = JSON.parse(localStorage.getItem("tenants")) || [];
 
@@ -1125,10 +1359,101 @@ const tenantForm = document.getElementById("tenantForm");
       infoEl.textContent = "This day is: " + today.toLocaleDateString('id-ID', options);
     }
   }
-  
+
   // init render
   renderTable();
   showToday();
+
+    document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const days = document.querySelectorAll('.day');
+
+            // Fungsi untuk menampilkan hari
+            const showDay = (dayData) => {
+                days.forEach(day => {
+                    day.classList.remove('active');
+                    if (day.dataset.day === dayData || dayData === 'all') {
+                        day.classList.add('active');
+                    }
+                });
+            };
+
+            // Tambahkan event listener untuk setiap tombol
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Hapus kelas 'active' dari semua tombol
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Tambahkan kelas 'active' ke tombol yang diklik
+                    btn.classList.add('active');
+                    // Tampilkan jadwal sesuai tombol yang diklik
+                    showDay(btn.dataset.day);
+                });
+            });
+
+            // Tampilkan jadwal untuk hari ini secara default
+            const today = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+            const todayBtn = document.querySelector(`.filter-btn[data-day="${today}"]`);
+            if (todayBtn) {
+                todayBtn.click();
+            } else {
+                // Jika hari ini bukan hari kerja, tampilkan semua jadwal
+                document.querySelector('.filter-btn[data-day="all"]').click();
+            }
+        });
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mainContent = document.getElementById('main-content');
+
+        // Fungsi untuk menyimpan urutan container ke localStorage
+        function saveOrder() {
+            const order = [];
+            mainContent.querySelectorAll('.container').forEach(el => {
+                order.push(el.id);
+            });
+            localStorage.setItem('widget-order', JSON.stringify(order));
+        }
+
+        // Fungsi untuk memuat urutan dari localStorage
+        function loadOrder() {
+            const savedOrder = JSON.parse(localStorage.getItem('widget-order'));
+            if (savedOrder && savedOrder.length === mainContent.children.length) {
+                // Buat salinan node untuk disusun ulang
+                const containers = {};
+                mainContent.querySelectorAll('.container').forEach(el => {
+                    containers[el.id] = el;
+                });
+
+                // Hapus semua node dari DOM
+                while (mainContent.firstChild) {
+                    mainContent.removeChild(mainContent.firstChild);
+                }
+
+                // Tambahkan kembali node sesuai urutan yang tersimpan
+                savedOrder.forEach(id => {
+                    if (containers[id]) {
+                        mainContent.appendChild(containers[id]);
+                    }
+                });
+            }
+        }
+
+        // Inisialisasi Sortable.js
+        Sortable.create(mainContent, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                // Panggil fungsi saveOrder saat drag and drop selesai
+                saveOrder();
+            },
+        });
+
+        // Muat urutan saat halaman pertama kali diakses
+        loadOrder();
+
+    });
+</script>
+
 </body>
 </html>
