@@ -805,8 +805,53 @@
             </footer>
         </div>
     </div>
+<div id="scrollBtn" 
+     style="position:fixed; bottom:20px; right:20px; background:var(--color-accent); color:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(52,152,219,0.18); overflow:hidden;">
+    <i id="icon" class="fa fa-arrow-down"></i>
+</div>
 
+<style>
+#icon {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+#icon.fade-out {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+}
+#icon.fade-in {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+</style>
 <script>
+    const btn = document.getElementById("scrollBtn");
+const icon = document.getElementById("icon");
+
+btn.addEventListener("click", () => {
+    if (window.scrollY === 0) {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+});
+
+function changeIcon(newClass) {
+    icon.classList.add("fade-out");
+    setTimeout(() => {
+        icon.className = newClass; // ganti icon
+        icon.classList.remove("fade-out");
+        icon.classList.add("fade-in");
+        setTimeout(() => icon.classList.remove("fade-in"), 300);
+    }, 300);
+}
+
+window.addEventListener("scroll", () => {
+    if (window.scrollY === 0) {
+        changeIcon("fa fa-arrow-down");
+    } else if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        changeIcon("fa fa-arrow-up");
+    }
+});
 async function startAFK(){
   await fetch("http://localhost:5000/start");
   loadLogs();
