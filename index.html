@@ -280,234 +280,7 @@
 </head>
 <body>
     <div id="main-content">
-        <div class="container" id="chatlog-container">
-            <header>
-                <div class="profile">
-                    <img src="https://i.postimg.cc/W4Sf1GmT/Ivantino-Francisco.jpg" class="profile-img" alt="">
-                <h2 class="name"><a href="profile.html" class="profile-link">Reza</a></h2>
-                </div>
-                <div class="controls">
-                    <div class="flex-row">
-                        <div class="dropdown">
-                            <button class="btnmenu">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </button>
-                            <div class="dropdown-content">
-                                <button id="pickFile" class="dropdown-item">Pilih File Chatlog</button>
-                                <button id="stopAlerts1" class="dropdown-item">Stop Alerts</button>
-                                <button id="manageRulesBtn" class="dropdown-item">Manage Rules</button>
-                            </div>
-                        </div>
-                        <i class="fa fa-volume-up btnmenu volume-on-mute" id="stopAlerts"></i>
-                    </div>
-                    <div class="flex-row">
-                        <div class="searchingwith-i">
-                            <input id="searchInput" class="search" type="text" placeholder="Search.."/>
-                            <i class="fa fa-search searchingicon"></i>
-                        </div>
-                        <span id="status" class="muted">Tidak ada file.</span>
-                    </div>
-                </div>
-            </header>
-
-            <div id="logArea">
-                <div class="drop-hint">Drop file .txt di sini atau klik "Pilih File Chatlog"</div>
-            </div>
-
-            <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
-                <div class="muted">Status: <span id="pollState">Idle</span></div>
-                <div class="muted">Auto-poll interval: 2s</div>
-            </footer>
-        </div>
-        <div class="container" id="tenant-container">
-            <style>
-                        :root {
-                --bg-color: #f8f9fa;
-                --card-bg: #cccaca3b;
-                --text-color: #212529;
-                --accent-gradient: linear-gradient(45deg, #dee2e6, #ced4da);
-                --expired-color: #dc3545;
-                --active-color: #28a745;
-                --archived-color: #6c757d;
-            }
-            .form-container, .table-container {
-                background: var(--card-bg);
-                padding: 25px;
-                border-radius: 12px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                margin-bottom: 25px;
-            }
-
-            form {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-                align-items: center;
-            }
-
-            select, input, button {
-                padding: 12px;
-                border-radius: 8px;
-                border: 1px solid #dee2e6;
-                font-size: 14px;
-                background: #f8f9fa;
-                color: var(--text-color);
-                transition: all 0.3s ease;
-            }
-
-            input:focus, select:focus {
-                outline: none;
-                border-color: #adb5bd;
-            }
-
-            button {
-                border: none;
-                cursor: pointer;
-                font-weight: 600;
-                color: var(--text-color);
-                background: var(--accent-gradient);
-                padding: 12px 20px;
-            }
-
-            button:hover {
-                background: linear-gradient(45deg, #ced4da, #adb5bd);
-                transform: translateY(-2px);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th, td {
-                padding: 15px;
-                text-align: left;
-                border-bottom: 1px solid #e9ecef;
-                font-size: 14px;
-            }
-
-            th {
-                background: #f1f3f5;
-                color: var(--text-color);
-                font-weight: 600;
-            }
-
-            /* tr:hover {
-                background: #f1f3f5;
-            } */
-
-            .status-active {
-                color: var(--active-color);
-                font-weight: 600;
-            }
-
-            .status-expired {
-                color: var(--expired-color);
-                font-weight: 600;
-            }
-
-            .status-archived {
-                color: var(--archived-color);
-                font-style: italic;
-                font-weight: normal;
-            }
-
-            .action-button {
-                padding: 8px 12px;
-                border-radius: 6px;
-                border: none;
-                font-size: 13px;
-                cursor: pointer;
-                transition: all 0.3s;
-                margin-right: 5px;
-            }
-
-            .delete-button {
-                background: #dc3545;
-                color: white;
-            }
-
-            .delete-button:hover {
-                background: #c82333;
-            }
-
-            .archive-button {
-                background: #ffc107;
-                color: #212529;
-            }
-
-            .archive-button:hover {
-                background: #e0a800;
-            }
-
-            .status-expired-highlight {
-                background: rgba(220, 53, 69, 0.05);
-            }
-            </style>
-            <div class="controls">
-                <h3>Tenant Tracker</h3>
-                </div>
-    <div class="form-container">
-    <form id="tenantForm">
-        <select id="owner" required>
-        <option value="Jace Caldwell">Jace Caldwell</option>
-        <option value="Jace Caldwell">Jace Caldwell</option>
-        <option value="Ivantino Francisco">Ivantino Francisco</option>
-        </select>
-
-        <select id="houseId" required>
-        <option value="#WVN">West Venturas Avenue</option>
-        <option value="#102">#102</option>
-        <option value="#103">#103</option>
-        </select>
-
-        <input type="text" id="tenantName" placeholder="Tenant" required>
-        <input value="450" type="number" id="price" placeholder="Harga" required>
-
-        <select id="durationSelect">
-        <option value="7">Durasi</option>
-        <option value="7">7 Hari</option>
-        <option value="14">14 Hari</option>
-        <option value="30">30 Hari</option>
-        </select>
-
-        <div class="debuger" style="display: none;">
-                <input type="number" id="durationManual" placeholder="Durasi Custom (hari)">
-
-        <input type="date" id="startDateDebug" placeholder="Tanggal Mulai (debug)">
-        </div>
-
-        <button type="submit">Tambah</button>
-    </form>
-    </div>
-
-    <div class="table-container">
-    <table id="tenantTable">
-        <thead>
-        <tr>
-            <th>Pemilik</th>
-            <th>Rumah</th>
-            <th>Tenant</th>
-            <th>Harga</th>
-            <th>Mulai</th>
-            <th>Expired</th>
-            <th>Status</th>
-            <th>Aksi</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    </div>
-
-    <div id="todayInfo" style="margin-top:8px; font-size:13px; color:#555;"></div>
-
-        </div>
-        <div class="container" id="schedule-container">
+                <div class="container" id="schedule-container">
             <style>
             :root {
                 --primary-color: #2c3e50;
@@ -735,6 +508,233 @@
                 </div>
             </div>
         </div>
+        <div class="container" id="chatlog-container">
+            <header>
+                <div class="profile">
+                    <img src="https://i.postimg.cc/W4Sf1GmT/Ivantino-Francisco.jpg" class="profile-img" alt="">
+                <h2 class="name"><a href="profile.html" class="profile-link">Reza</a></h2>
+                </div>
+                <div class="controls">
+                    <div class="flex-row">
+                        <div class="dropdown">
+                            <button class="btnmenu">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-content">
+                                <button id="pickFile" class="dropdown-item">Pilih File Chatlog</button>
+                                <button id="stopAlerts1" class="dropdown-item">Stop Alerts</button>
+                                <button id="manageRulesBtn" class="dropdown-item">Manage Rules</button>
+                            </div>
+                        </div>
+                        <i class="fa fa-volume-up btnmenu volume-on-mute" id="stopAlerts"></i>
+                    </div>
+                    <div class="flex-row">
+                        <div class="searchingwith-i">
+                            <input id="searchInput" class="search" type="text" placeholder="Search.."/>
+                            <i class="fa fa-search searchingicon"></i>
+                        </div>
+                        <span id="status" class="muted">Tidak ada file.</span>
+                    </div>
+                </div>
+            </header>
+
+            <div id="logArea">
+                <div class="drop-hint">Drop file .txt di sini atau klik "Pilih File Chatlog"</div>
+            </div>
+
+            <footer style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div class="muted">Status: <span id="pollState">Idle</span></div>
+                <div class="muted">Auto-poll interval: 2s</div>
+            </footer>
+        </div>
+        <div class="container" id="tenant-container">
+            <style>
+                        :root {
+                --bg-color: #f8f9fa;
+                --card-bg: #cccaca3b;
+                --text-color: #212529;
+                --accent-gradient: linear-gradient(45deg, #dee2e6, #ced4da);
+                --expired-color: #dc3545;
+                --active-color: #28a745;
+                --archived-color: #6c757d;
+            }
+            .form-container, .table-container {
+                background: var(--card-bg);
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                margin-bottom: 25px;
+            }
+
+            form {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+                align-items: center;
+            }
+
+            select, input, button {
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #dee2e6;
+                font-size: 14px;
+                background: #f8f9fa;
+                color: var(--text-color);
+                transition: all 0.3s ease;
+            }
+
+            input:focus, select:focus {
+                outline: none;
+                border-color: #adb5bd;
+            }
+
+            button {
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                color: var(--text-color);
+                background: var(--accent-gradient);
+                padding: 12px 20px;
+            }
+
+            button:hover {
+                background: linear-gradient(45deg, #ced4da, #adb5bd);
+                transform: translateY(-2px);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #e9ecef;
+                font-size: 14px;
+            }
+
+            th {
+                background: #f1f3f5;
+                color: var(--text-color);
+                font-weight: 600;
+            }
+
+            /* tr:hover {
+                background: #f1f3f5;
+            } */
+
+            .status-active {
+                color: var(--active-color);
+                font-weight: 600;
+            }
+
+            .status-expired {
+                color: var(--expired-color);
+                font-weight: 600;
+            }
+
+            .status-archived {
+                color: var(--archived-color);
+                font-style: italic;
+                font-weight: normal;
+            }
+
+            .action-button {
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: none;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.3s;
+                margin-right: 5px;
+            }
+
+            .delete-button {
+                background: #dc3545;
+                color: white;
+            }
+
+            .delete-button:hover {
+                background: #c82333;
+            }
+
+            .archive-button {
+                background: #ffc107;
+                color: #212529;
+            }
+
+            .archive-button:hover {
+                background: #e0a800;
+            }
+
+            .status-expired-highlight {
+                background: rgba(220, 53, 69, 0.05);
+            }
+            </style>
+            <div class="controls">
+                <h3>Tenant Tracker</h3>
+                </div>
+    <div class="form-container">
+    <form id="tenantForm">
+        <select id="owner" required>
+        <option value="Jace Caldwell">Jace Caldwell</option>
+        <option value="Jace Caldwell">Jace Caldwell</option>
+        <option value="Ivantino Francisco">Ivantino Francisco</option>
+        </select>
+
+        <select id="houseId" required>
+        <option value="#WVN">West Venturas Avenue</option>
+        <option value="#102">#102</option>
+        <option value="#103">#103</option>
+        </select>
+
+        <input type="text" id="tenantName" placeholder="Tenant" required>
+        <input value="450" type="number" id="price" placeholder="Harga" required>
+
+        <select id="durationSelect">
+        <option value="7">Durasi</option>
+        <option value="7">7 Hari</option>
+        <option value="14">14 Hari</option>
+        <option value="30">30 Hari</option>
+        </select>
+
+        <div class="debuger" style="display: none;">
+                <input type="number" id="durationManual" placeholder="Durasi Custom (hari)">
+
+        <input type="date" id="startDateDebug" placeholder="Tanggal Mulai (debug)">
+        </div>
+
+        <button type="submit">Tambah</button>
+    </form>
+    </div>
+
+    <div class="table-container">
+    <table id="tenantTable">
+        <thead>
+        <tr>
+            <th>Pemilik</th>
+            <th>Rumah</th>
+            <th>Tenant</th>
+            <th>Harga</th>
+            <th>Mulai</th>
+            <th>Expired</th>
+            <th>Status</th>
+            <th>Aksi</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    </div>
+
+    <div id="todayInfo" style="margin-top:8px; font-size:13px; color:#555;"></div>
+
+        </div>
         <div class="container" id="afk-container">
             <style>
                 h3 {
@@ -809,6 +809,229 @@
      style="position:fixed; bottom:20px; right:20px; background:var(--color-accent); color:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(52,152,219,0.18); overflow:hidden;">
     <i id="icon" class="fa fa-arrow-down"></i>
 </div>
+    <style>
+        /* ================= Settings Popup ================= */
+/* ====== Popup chat-bubble style & anim ====== */
+@keyframes popupIn {
+  0%   { transform: scale(.65) translateY(12px); opacity: 0; }
+  60%  { transform: scale(1.06) translateY(-6px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes popupOut {
+  0%   { transform: scale(1) translateY(0); opacity: 1; }
+  100% { transform: scale(.65) translateY(12px); opacity: 0; }
+}
+
+/* ====== Settings gear & popup (chat-bubble) ====== */
+#settingsBtn {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: var(--color-accent);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  z-index: 9999;
+}
+#settingsPopup {
+  position: fixed;
+  bottom: 120px;
+  right: 20px;
+  width: 320px;
+  max-width: calc(100% - 40px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  padding: 12px;
+  display: none;
+  transform-origin: bottom right;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+}
+@keyframes popupIn {
+  0% { transform: scale(.8) translateY(12px); opacity: 0 }
+  60% { transform: scale(1.03) translateY(-6px); opacity: 1 }
+  100% { transform: scale(1) translateY(0); opacity: 1 }
+}
+@keyframes popupOut {
+  0% { transform: scale(1) translateY(0); opacity: 1 }
+  100% { transform: scale(.8) translateY(12px); opacity: 0 }
+}
+#settingsPopup.open {
+  display: flex; flex-direction: column;
+  pointer-events: auto;
+  animation: popupIn 320ms cubic-bezier(.2,.9,.3,1) both;
+}
+#settingsPopup.closing {
+  animation: popupOut 220ms cubic-bezier(.4,.0,.2,1) both;
+}
+#settingsPopup textarea {
+  width:100%;
+  height:76px;
+  resize:none;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #e9eef6;
+  font-family: var(--font-main);
+}
+#settingsPopup .row { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+#settingsPopup .btn { padding:8px 12px; border-radius:8px; cursor:pointer; }
+#settingsPopup .btn.secondary { background: transparent; color:var(--color-accent); border:1px solid rgba(0,0,0,0.06); }
+
+/* ===== Announce modal (tengah, minimal & elegan) ===== */
+/* Default state (hidden) */
+#announceBar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  min-width: 260px;
+  max-width: 420px;
+  width: 85%;
+  background: #fff;
+  color: #222;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Saat show → mainkan animasi */
+#announceBar.show {
+  animation: announceIn 0.45s cubic-bezier(.25,.9,.35,1.2) forwards;
+  pointer-events: auto;
+}
+
+/* Saat hide → mainkan animasi keluar */
+#announceBar.hide {
+  animation: announceOut 0.35s ease forwards;
+  pointer-events: none;
+}
+
+/* Keyframes animasi masuk */
+@keyframes announceIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -52%) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Keyframes animasi keluar */
+@keyframes announceOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -54%) scale(0.85);
+  }
+}
+
+.announce-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px; }
+.announce-title { font-weight:700; font-size:15px; color:#111; }
+.announce-subtitle { font-size:12px; color:#666; margin-top:4px; }
+#closeAnnounce {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #171d20; /* biru elegan */
+  padding: 4px;
+  border-radius: 50%;
+  transition: transform 0.4s ease, color 0.3s ease, background 0.3s ease;
+}
+
+/* Hover efek */
+#closeAnnounce:hover {
+  background: rgba(52,152,219,0.1); /* biru transparan */
+  color: #290404; /* biru lebih gelap */
+  transform: rotate(180deg) scale(1.15);
+}
+
+/* Optional: saat klik */
+#closeAnnounce:active {
+  transform: rotate(220deg) scale(0.95);
+  background: rgba(52,152,219,0.2);
+}
+
+#announceText { font-size:14px; color:#222; line-height:1.45; word-break:break-word; }
+.textareapopup {
+  width:100%;
+  height:150px;
+  resize:none;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #37373799;
+  font-family: var(--font-main);
+  background: #d2d1d1;
+  color: #333;
+}
+/* Overlay belakang (blur) */
+#overlay {
+  position: fixed;
+  inset: 0; /* top:0; left:0; right:0; bottom:0 */
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px); /* efek blur */
+  z-index: 999; /* di bawah popup */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+/* Saat popup muncul */
+#overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+
+</style>
+<!-- ===== Settings gear ===== -->
+<div id="settingsBtn" title="Pengaturan">
+  <i class="fa fa-sticky-note"></i>
+</div>
+
+<!-- ===== Popup chat-bubble (settings) ===== -->
+<div id="settingsPopup" aria-hidden="true">
+  <textarea id="announceInput" placeholder="Tulis pengumuman / catatan..."></textarea>
+  <div class="row">
+    <button id="clearAnnounce" class="btn secondary">Hapus</button>
+    <button id="saveAnnounce" class="btn">Simpan</button>
+  </div>
+</div>
+<!-- Overlay belakang -->
+<div id="overlay"></div>
+
+<!-- ===== Announce Modal (tengah) ===== -->
+<div id="announceBar" role="dialog" aria-live="polite" aria-modal="true" aria-hidden="true">
+  <div class="announce-header">
+    <div>
+      <div class="announce-title">Catatan</div>
+    </div>
+    <button id="closeAnnounce" class="closebutton" aria-label="Tutup">✕</button>
+  </div>
+  <div id="announceText" class="textareapopup"></div>
+</div>
+
+
 
 <style>
 #icon {
@@ -1448,61 +1671,189 @@ function saveLogToStorage(text) {
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const mainContent = document.getElementById('main-content');
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const mainContent = document.getElementById('main-content');
 
-        // Fungsi untuk menyimpan urutan container ke localStorage
-        function saveOrder() {
-            const order = [];
-            mainContent.querySelectorAll('.container').forEach(el => {
-                order.push(el.id);
-            });
-            localStorage.setItem('widget-order', JSON.stringify(order));
-        }
+    //     // Fungsi untuk menyimpan urutan container ke localStorage
+    //     function saveOrder() {
+    //         const order = [];
+    //         mainContent.querySelectorAll('.container').forEach(el => {
+    //             order.push(el.id);
+    //         });
+    //         localStorage.setItem('widget-order', JSON.stringify(order));
+    //     }
 
-        // Fungsi untuk memuat urutan dari localStorage
-        function loadOrder() {
-            const savedOrder = JSON.parse(localStorage.getItem('widget-order'));
-            if (savedOrder && savedOrder.length === mainContent.children.length) {
-                // Buat salinan node untuk disusun ulang
-                const containers = {};
-                mainContent.querySelectorAll('.container').forEach(el => {
-                    containers[el.id] = el;
-                });
+    //     // Fungsi untuk memuat urutan dari localStorage
+    //     function loadOrder() {
+    //         const savedOrder = JSON.parse(localStorage.getItem('widget-order'));
+    //         if (savedOrder && savedOrder.length === mainContent.children.length) {
+    //             // Buat salinan node untuk disusun ulang
+    //             const containers = {};
+    //             mainContent.querySelectorAll('.container').forEach(el => {
+    //                 containers[el.id] = el;
+    //             });
 
-                // Hapus semua node dari DOM
-                while (mainContent.firstChild) {
-                    mainContent.removeChild(mainContent.firstChild);
-                }
+    //             // Hapus semua node dari DOM
+    //             while (mainContent.firstChild) {
+    //                 mainContent.removeChild(mainContent.firstChild);
+    //             }
 
-                // Tambahkan kembali node sesuai urutan yang tersimpan
-                savedOrder.forEach(id => {
-                    if (containers[id]) {
-                        mainContent.appendChild(containers[id]);
-                    }
-                });
-            }
-        }
+    //             // Tambahkan kembali node sesuai urutan yang tersimpan
+    //             savedOrder.forEach(id => {
+    //                 if (containers[id]) {
+    //                     mainContent.appendChild(containers[id]);
+    //                 }
+    //             });
+    //         }
+    //     }
 
-        // Inisialisasi Sortable.js
-        Sortable.create(mainContent, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            delay: 300, // Mengurangi delay menjadi 300ms
-            delayOnTouchOnly: true,
-            touchStartThreshold: 3,
-            filter: 'button, a, input, [data-no-dnd]', // Menambahkan filter untuk mengabaikan tombol
-            preventOnFilter: true, // Memastikan event drag tidak terjadi pada elemen yang difilter
-            onEnd: function (evt) {
-                // Panggil fungsi saveOrder saat drag and drop selesai
-                saveOrder();
-            },
-        });
+    //     // Inisialisasi Sortable.js
+    //     Sortable.create(mainContent, {
+    //         animation: 150,
+    //         ghostClass: 'sortable-ghost',
+    //         delay: 300, // Mengurangi delay menjadi 300ms
+    //         delayOnTouchOnly: true,
+    //         touchStartThreshold: 3,
+    //         filter: 'button, a, input, [data-no-dnd], td, th', // Menambahkan filter untuk mengabaikan tombol
+    //         preventOnFilter: true, // Memastikan event drag tidak terjadi pada elemen yang difilter
+    //         onEnd: function (evt) {
+    //             // Panggil fungsi saveOrder saat drag and drop selesai
+    //             saveOrder();
+    //         },
+    //     });
 
-        // Muat urutan saat halaman pertama kali diakses
-        loadOrder();
+    //     // Muat urutan saat halaman pertama kali diakses
+    //     loadOrder();
 
+    // });
+    // ================= Settings Popup Logic =================
+ (function(){
+  // elemen
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPopup = document.getElementById('settingsPopup');
+  const announceBar = document.getElementById('announceBar');
+  const announceText = document.getElementById('announceText');
+  const announceInput = document.getElementById('announceInput');
+  const saveBtn = document.getElementById('saveAnnounce');
+  const clearBtn = document.getElementById('clearAnnounce');
+  const closeBtn = document.getElementById('closeAnnounce');
+  const overlay = document.getElementById("overlay");
+  const STORAGE_KEY = 'my_announce';
+// Saat show announce, aktifkan overlay
+function showAnnounce(text){
+  if (!announceBar || !announceText) return;
+  announceText.textContent = text;
+  announceBar.classList.add("show");
+  announceBar.setAttribute('aria-hidden','false');
+  if (overlay) overlay.classList.add("show");
+}
+
+// Saat hide announce, matikan overlay
+function hideAnnounce(){
+  if (!announceBar) return;
+  announceBar.classList.remove("show");
+  announceBar.setAttribute('aria-hidden','true');
+  if (overlay) overlay.classList.remove("show");
+}
+
+// klik overlay = close popup
+if (overlay) overlay.addEventListener("click", hideAnnounce);
+  // safety: jika elemen nggak ada, jangan lempar error
+  function elExists(el){ return typeof el !== 'undefined' && el && el.nodeType; }
+
+  // OPEN / CLOSE popup settings (class-based, anim-friendly)
+  function openPopup(){
+    if (!elExists(settingsPopup)) return;
+    settingsPopup.style.display = 'flex';
+    requestAnimationFrame(()=> {
+      settingsPopup.classList.remove('closing');
+      settingsPopup.classList.add('open');
+      settingsPopup.setAttribute('aria-hidden','false');
     });
+  }
+  function closePopup(){
+    if (!elExists(settingsPopup)) return;
+    settingsPopup.classList.remove('open');
+    settingsPopup.classList.add('closing');
+    settingsPopup.setAttribute('aria-hidden','true');
+    settingsPopup.addEventListener('animationend', function handler(){
+      settingsPopup.style.display = 'none';
+      settingsPopup.classList.remove('closing');
+      settingsPopup.removeEventListener('animationend', handler);
+    }, { once: true });
+  }
+
+  // SHOW / HIDE announce (gunakan announceText, bukan menimpa seluruh container)
+  function showAnnounce(text){
+    if (!elExists(announceBar) || !elExists(announceText)) return;
+    announceText.textContent = text;
+    announceBar.classList.add('show');
+    announceBar.setAttribute('aria-hidden','false');
+  }
+  function hideAnnounce(){
+    if (!elExists(announceBar)) return;
+    announceBar.classList.remove('show');
+    announceBar.setAttribute('aria-hidden','true');
+  }
+
+  // Toggle via gear
+  if (elExists(settingsBtn)) {
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (settingsPopup.classList.contains('open')) closePopup();
+      else openPopup();
+    });
+  }
+
+  // klik di dalam popup jangan tutup
+  if (elExists(settingsPopup)) settingsPopup.addEventListener('click', e => e.stopPropagation());
+
+  // klik luar tutup popup
+  document.addEventListener('click', () => { if (elExists(settingsPopup) && settingsPopup.classList.contains('open')) closePopup(); });
+
+  // ESC tutup popup
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (elExists(settingsPopup) && settingsPopup.classList.contains('open')) closePopup(); else if (elExists(announceBar) && announceBar.classList.contains('show')) hideAnnounce(); } });
+
+  // save ke localStorage
+  if (elExists(saveBtn)) {
+    saveBtn.addEventListener('click', () => {
+      const text = (announceInput && announceInput.value) ? announceInput.value.trim() : '';
+      if (!text) {
+        // kosong berarti hapus
+        localStorage.removeItem(STORAGE_KEY);
+        hideAnnounce();
+        closePopup();
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, text);
+      showAnnounce(text);
+      closePopup();
+    });
+  }
+
+  // hapus dari popup (clear)
+  if (elExists(clearBtn)) {
+    clearBtn.addEventListener('click', () => {
+      if (announceInput) announceInput.value = '';
+      localStorage.removeItem(STORAGE_KEY);
+      hideAnnounce();
+      closePopup();
+    });
+  }
+
+  // close button di modal announce
+  if (elExists(closeBtn)) closeBtn.addEventListener('click', hideAnnounce);
+
+  // load yang sudah tersimpan saat page ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      if (announceInput) announceInput.value = saved;
+      showAnnounce(saved);
+    }
+  });
+
+})();
 </script>
 
 </body>
